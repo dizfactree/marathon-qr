@@ -5,8 +5,10 @@ window.GarminCodec={
   name=name.normalize('NFC').trim();
   if(/[\u0000-\u001F\u007F-\u009F\u2028\u2029]/u.test(name))throw Error('줄바꿈과 제어문자는 사용할 수 없습니다.');
   // Conservative event allowlist. Actual engraving depends on the selected xTool font.
-  const allowed=/^[\p{Script=Hangul}A-Za-z0-9 ._()/&+*@-]+$/u;
-  if(!allowed.test(name))throw Error('지원하지 않는 특수문자입니다. 사용 가능: - . _ ( ) / & + * @');
+const allowed = /^[\p{Script=Hangul}A-Za-z0-9 .,_()\/&+*@!?#♡♥☆★\-]+$/u;
+if (!allowed.test(name)) {
+  throw Error('지원하지 않는 문자입니다. 이모지와 일부 특수기호는 사용할 수 없습니다.');
+}
   const points=Array.from(name);
   if(points.length<1||points.length>24)throw Error('이름은 1~24자로 입력해 주세요.');
   const match=/^(\d{2}):(\d{2}):(\d{2})$/.exec(time);
