@@ -4,7 +4,35 @@ function svgQR(data){const qr=new QRCodeEngine(0,1);qr.addData(data);qr.make();c
 function switchView(isQR){$('input-view').hidden=isQR;$('qr-view').hidden=!isQR;document.querySelector('[data-step="1"]').classList.toggle('active',!isQR);document.querySelector('[data-step="2"]').classList.toggle('active',isQR);window.scrollTo(0,0)}
 function numeric(id){const el=$(id);el.addEventListener('input',()=>{el.value=el.value.replace(/\D/g,'').slice(0,2)});}
 for(const id of ['hours','minutes','seconds'])numeric(id);
+
+const nameInput=$('name');
+const nameHint=document.createElement('div');
+nameHint.id='name-validation';
+nameHint.setAttribute('aria-live','polite');
+nameHint.className='field-note';
+nameHint.hidden=true;
+nameInput.insertAdjacentElement('afterend',nameHint);
+nameInput.setAttribute('aria-describedby',[nameInput.getAttribute('aria-describedby'),'name-validation'].filter(Boolean).join(' '));
+function validateName(showEmpty=false){
+  const name=nameInput.value.normalize('NFC').trim();
+  let message='';
+  if(name||showEmpty){
+    try{GarminCodec.encode(name,'00:00:01');}
+    catch(err){message=err.message||'입력 정보를 확인해 주세요.';}
+  }
+  nameHint.textContent=message;
+  nameHint.hidden=!message;
+  nameHint.style.color='#c62828';
+  nameInput.setAttribute('aria-invalid',String(Boolean(message)));
+  nameInput.setCustomValidity(message);
+  return !message;
+}
+nameInput.addEventListener('input',e=>{if(!e.isComposing)validateName();});
+nameInput.addEventListener('compositionend',()=>validateName());
+nameInput.addEventListener('blur',()=>validateName(true));
+
 $('entry').addEventListener('submit',e=>{e.preventDefault();$('error').textContent='';try{
+  if(!validateName(true)){nameInput.focus();return;}
   const name=$('name').value.normalize('NFC').trim();const vals=['hours','minutes','seconds'].map(id=>$(id).value);
   if(vals.some(v=>!/^\d{1,2}$/.test(v)))throw Error('시간, 분, 초를 모두 입력해 주세요.');
   const time=vals.map(x=>x.padStart(2,'0')).join(':');const encoded=GarminCodec.encode(name,time);
