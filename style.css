@@ -2,7 +2,7 @@
 
 @media(max-width:600px){
  .hero{background:#070707;text-align:center}
- .hero img{width:auto;max-width:100%;height:clamp(100px,21svh,155px);min-height:0;object-fit:contain;margin:auto}
+ .hero img{width:100%;max-width:100%;height:auto;min-height:0;object-fit:contain;margin:auto}
  .panel{padding:12px 18px 14px;min-height:0}
  nav{margin-bottom:10px;gap:10px}
  nav b{width:22px;height:22px}
