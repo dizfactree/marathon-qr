@@ -27,6 +27,20 @@ QR8bitByte.prototype = {
 module.exports = QR8bitByte;
 
 };
+// Standard numeric mode preserves every digit, including leading zeroes.
+modules["QRNumeric"]=function(module,exports,require){
+function QRNumeric(data) { this.mode = 1; this.data = data; }
+QRNumeric.prototype = {
+ getLength : function() { return this.data.length; },
+ write : function(buffer) {
+  for (var i = 0; i < this.data.length; i += 3) {
+   var chunk = this.data.slice(i, i + 3);
+   buffer.put(Number(chunk), chunk.length === 3 ? 10 : chunk.length === 2 ? 7 : 4);
+  }
+ }
+};
+module.exports = QRNumeric;
+};
 modules["QRBitBuffer"]=function(module,exports,require){
 function QRBitBuffer() {
 	this.buffer = [];
@@ -812,6 +826,7 @@ modules["index"]=function(module,exports,require){
 //---------------------------------------------------------------------
 
 var QR8bitByte = require('./QR8bitByte');
+var QRNumeric = require('./QRNumeric');
 var QRUtil = require('./QRUtil');
 var QRPolynomial = require('./QRPolynomial');
 var QRRSBlock = require('./QRRSBlock');
@@ -829,7 +844,7 @@ function QRCode(typeNumber, errorCorrectLevel) {
 QRCode.prototype = {
 	
 	addData : function(data) {
-		var newData = new QR8bitByte(data);
+		var newData = /^[0-9]+$/.test(data) ? new QRNumeric(data) : new QR8bitByte(data);
 		this.dataList.push(newData);
 		this.dataCache = null;
 	},
